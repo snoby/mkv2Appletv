@@ -1,6 +1,7 @@
 #set your language below
 language: go
 
+
 #set language version. This is only required if you use the default Shippable image for your build
 go: 1.6
 

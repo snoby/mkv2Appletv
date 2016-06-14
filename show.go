@@ -25,7 +25,6 @@ func show_ffprobe_info(in string) {
 
 	fileStreams, err = h.Streams()
 	if err != nil {
-		fmt.Println("This stream format doesn't seem to be known, exiting")
 		fmt.Println(err)
 		return
 	}
