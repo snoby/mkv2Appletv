@@ -1,9 +1,8 @@
 #set your language below
-language: golang
+language: go
 
 #set language version. This is only required if you use the default Shippable image for your build
-go:
-    - 1.6
+go: 1.6
 
 before_install:
   - export GOPATH=$SHIPPABLE_GOPATH
@@ -25,6 +24,7 @@ build:
         options:
     #commands in this section run inside your CI container. In addition, any commands such as ls, in this section can be used to skip default processing for CI.
     ci:
+      go build
 
     post_ci:
     on_success:
