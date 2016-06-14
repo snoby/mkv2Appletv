@@ -2,9 +2,11 @@
 language: golang
 
 #set language version. This is only required if you use the default Shippable image for your build
-golang:
+go:
     - 1.6
 
+before_install:
+  - export GOPATH=$SHIPPABLE_GOPATH
 #specify which services you need. This is only valid if you use the default Shippable image for your build
 services:
 
@@ -33,20 +35,3 @@ build:
 
 
 
-integrations:
-#if you are using integrations, you'll need to set it up in two places. Project settings & here in this section of the yml.
-    notifications:
-        - integrationName:
-          type:
-          recipients:
-          branches:
-          on_start:
-          on_success
-          on_failure:
-          on_changed:   
-
-    hub:
-        - integrationName:
-          type:
-          agent_only:
-          branches:
