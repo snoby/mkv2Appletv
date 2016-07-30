@@ -1,8 +1,9 @@
 package main
 
 import (
-	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
+
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -33,7 +34,8 @@ func main() {
 		show_ffprobe_info((*input))
 
 	case convert.FullCommand():
-		//println("Input file", input.Name())
+		println("Input file ", (*input))
+		suggestConvSettings((*input))
 
 	}
 }

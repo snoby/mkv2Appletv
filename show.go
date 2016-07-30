@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/snoby/go-ffprobe"
 )
 
@@ -36,9 +37,11 @@ func show_ffprobe_info(in string) {
 	for _, stream := range fileStreams {
 		if stream.CodecType == "audio" {
 			fmt.Printf("AudioStream: codec: %s channels: %+v bitrate: %s\n", stream.CodecName, stream.Channels, stream.BitRate)
-		}
-		if stream.CodecType == "video" {
+		} else if stream.CodecType == "video" {
 			fmt.Printf("VideoStream: codec: %s Profile: %s   bitrate: %s \n", stream.CodecName, stream.Profile, stream.BitRate)
+		} else {
+			fmt.Printf("Data Stream: %s type: %s   \n", stream.CodecName, stream.CodecType)
 		}
+
 	}
 }
