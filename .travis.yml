@@ -7,11 +7,17 @@ sudo: false
 go:
   - 1.6.3
 
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq ffprobe
-  - go env && pwd
+#
+# Because we are using the container based environment
+# we can't use sudo which means we have to use the apt addon
+#
+addons:
+  apt:
+    packages:
+    - ffprobe
+    - time
 
+#before_install:
 
 install:
   # Add Godeps dependencies to GOPATH and PATH
