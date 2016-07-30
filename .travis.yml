@@ -1,6 +1,9 @@
 
 language: go
 
+#Make sure we use a container based build
+sudo: false
+
 go:
   - 1.6.3
 
