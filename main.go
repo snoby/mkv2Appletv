@@ -31,7 +31,7 @@ func main() {
 	// Register user
 	case show.FullCommand():
 		println("Input file ", (*input))
-		show_ffprobe_info((*input))
+		showFFprobeInfo((*input))
 
 	case convert.FullCommand():
 		println("Input file ", (*input))

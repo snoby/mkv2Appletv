@@ -9,6 +9,18 @@ import (
 
 var ()
 
+// Convert Contains the control block of what we will do with the
+// conversion process
+type Convert struct {
+	inFile            string
+	outFile           string
+	masterVideoStream *ffprobe.Stream
+	masterAudioStream *ffprobe.Stream
+	outVideo          string
+	outAudio0         string
+	outAudio1         string
+}
+
 //
 // Take a list of audio streams and suggest the best one
 // to use as a master to transcode from.
@@ -99,6 +111,13 @@ func masterAudio(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 	return
 }
 
+//
+//
+// Find the masterVideo stream.  At this point it's usually just
+// the only video stream, but may need to add code here for the
+// situation where we have more than one video
+//
+//
 func masterVideo(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 	for _, stream := range fileStreams {
 		if stream.CodecType == "video" {
@@ -117,6 +136,84 @@ func masterVideo(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 	return
 }
 
+func (media *Convert) print() {
+	fmt.Println("***")
+	fmt.Printf("Primary Video Stream (%s)\n", media.masterVideoStream.CodecName)
+	fmt.Printf("Primary Audio Stream (%s)\n", media.masterAudioStream.CodecName)
+	fmt.Printf("----------Planned Output-----------------\n")
+	fmt.Printf("Video Stream (%s)  operation [%s]\n", "h264", media.outVideo)
+	fmt.Printf("Primary  Audio Stream (%s)  operation [%s]\n", "aac", media.outAudio0)
+	fmt.Printf("Second  Audio Stream  (%s)  operation [%s]\n", "ac3", media.outAudio1)
+
+}
+
+//
+// Adding a method
+//
+func (media *Convert) setupAudioConversion() {
+
+	if media.masterAudioStream.Channels == 2 {
+		//
+		// Can't surround sound with this.
+		//
+		switch media.masterAudioStream.CodecName {
+		case "aac":
+			media.outAudio0 = "copy"
+			media.outAudio1 = "none"
+		case "ac3":
+			media.outAudio0 = "convert"
+			media.outAudio1 = "none"
+		case "dts":
+			media.outAudio0 = "convert"
+			media.outAudio1 = "none"
+		default:
+			fmt.Println("Not sure what to do with this codec: %s", media.masterAudioStream.CodecName)
+
+		} // end of switch
+	} else {
+		switch media.masterAudioStream.CodecName {
+		case "aac":
+			media.outAudio0 = "convert"
+			media.outAudio1 = "convert"
+		case "ac3":
+			media.outAudio0 = "convert"
+			media.outAudio1 = "copy"
+		case "dts":
+			media.outAudio0 = "convert"
+			media.outAudio1 = "convert"
+		default:
+			fmt.Println("Not sure what to do with this codec: %s", media.masterAudioStream.CodecName)
+
+		} // end of switch
+
+	} //end of if channels > 2
+}
+
+//
+// Adding a method
+//
+func (media *Convert) setupVideoConversion() {
+
+	//
+	// Can't surround sound with this.
+	//
+	switch media.masterVideoStream.CodecName {
+	case "h264":
+		media.outVideo = "copy"
+	default:
+		media.outVideo = "convert"
+
+	} // end of switch
+
+}
+
+//
+//
+// Find the best audio and video streams in the container
+// Then make a suggestion on what to do with the streams
+// to make a compatible mp4 file for the appleTV.
+//
+//
 func suggestConvSettings(in string) {
 
 	println("Input filename:", in)
@@ -136,6 +233,9 @@ func suggestConvSettings(in string) {
 		return
 	}
 
+	media := new(Convert)
+	media.inFile = in
+
 	fmt.Printf(" Information about file: %s \n", fileFormat.Filename)
 	fmt.Printf(" Number of Streams: %d \n", fileFormat.NBStreams)
 	fmt.Printf(" File has duration: %s (s)\n", fileFormat.Duration)
@@ -154,7 +254,14 @@ func suggestConvSettings(in string) {
 	}
 	Audiostream := fileStreams[masterAudioInx]
 
-	fmt.Printf("Master video codec: %s \n", Videostream.CodecName)
+	media.masterVideoStream = Videostream
+	media.masterAudioStream = Audiostream
+
+	fmt.Printf("Master Video codec: %s \n", Videostream.CodecName)
 	fmt.Printf("Master Audio codec: %s numChannels:%d\n", Audiostream.CodecName, Audiostream.Channels)
+
+	media.setupAudioConversion()
+	media.setupVideoConversion()
+	media.print()
 
 }
