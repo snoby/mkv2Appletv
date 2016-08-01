@@ -12,8 +12,7 @@ var (
 	fileStreams []*ffprobe.Stream
 )
 
-func show_ffprobe_info(in string) {
-	println("Input filename:", in)
+func showFFprobeInfo(in string) {
 
 	h := ffprobe.File(in)
 
