@@ -16,17 +16,16 @@ env:
 matrix:
 
 build:
-    #commands in this section run on your build machine and not inside your CI container.
-    pre_ci:
-
     pre_ci_boot:
         image_name: iotapi322/ffmpeg-golang
         image_tag: latest
         pull: true
         options:
     #commands in this section run inside your CI container. In addition, any commands such as ls, in this section can be used to skip default processing for CI.
+    pre_ci:
+
     ci:
-      go build
+      - go version
 
     post_ci:
     on_success:
