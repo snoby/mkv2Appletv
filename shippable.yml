@@ -3,8 +3,6 @@ language: go
 
 
 #set language version. This is only required if you use the default Shippable image for your build
-go:
-  - tip
 
 before_install:
   - export GOPATH=$SHIPPABLE_GOPATH
@@ -15,24 +13,27 @@ env:
 
 matrix:
 
+
+
+
 build:
-    pre_ci_boot:
-        image_name: iotapi322/ffmpeg-golang
-        image_tag: latest
-        pull: true
-        options:
-    #commands in this section run inside your CI container. In addition, any commands such as ls, in this section can be used to skip default processing for CI.
-    pre_ci:
+ pre_ci_boot:
+   image_name: iotapi322/ffmpeg-golang
+   image_tag: latest
+   pull: true
+   options:
+   pre_ci:
 
-    ci:
-      - go version
+   ci:
+     go version
+     go build
+     mkv2Appletv --help
 
-    post_ci:
-    on_success:
-    on_failure:
-    cache: true
-    #commands in this section run on your build machine and not inside your CI container.
-    push:
+ post_ci:
+ on_success:
+ on_failure:
+ cache: true
+ push:
 
 
 
