@@ -15,6 +15,9 @@ var (
 
 	suggest      = app.Command("suggest", "Show what the suggested output of the transformation would look like.")
 	suggestinput = suggest.Arg("input", "Location of input File").Required().ExistingFile()
+
+	convert      = app.Command("convert", "Take input and run ffmpeg to generate an optimal mp4 file")
+	convertinput = convert.Arg("input", "Location of input File").Required().ExistingFile()
 )
 
 func main() {
@@ -26,7 +29,6 @@ func main() {
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 
-	// Register user
 	case show.FullCommand():
 		println("Input file ", (*showinput))
 		showFFprobeInfo((*showinput))
@@ -35,5 +37,8 @@ func main() {
 		println("Input file ", (*suggestinput))
 		suggestConvSettings((*suggestinput))
 
+	case convert.FullCommand():
+		println("Input file ", (*convertinput))
+		convertSource((*convertinput))
 	}
 }

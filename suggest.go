@@ -7,7 +7,9 @@ import (
 	"github.com/snoby/go-ffprobe"
 )
 
-var ()
+var (
+	media = new(Convert)
+)
 
 // Convert Contains the control block of what we will do with the
 // conversion process
@@ -59,6 +61,8 @@ func masterAudio(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 		if stream.CodecType == "audio" {
 			if stream.Channels > 2 {
 				switch stream.CodecName {
+				case "truehd":
+					fallthrough
 				case "aac":
 					fallthrough
 				case "dts":
@@ -99,6 +103,8 @@ func masterAudio(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 		if stream.CodecType == "audio" {
 			if stream.Channels == 2 {
 				switch stream.CodecName {
+				case "truehd":
+					fallthrough
 				case "dts":
 					streamIndex = stream.Index
 					return
@@ -121,15 +127,8 @@ func masterAudio(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 func masterVideo(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 	for _, stream := range fileStreams {
 		if stream.CodecType == "video" {
-			switch stream.CodecName {
-			case "h264":
-				streamIndex = stream.Index
-				return
-			case "h265":
-				err = errors.New("Not currently handling h265 streams yet")
-				return
-
-			} // end of switch
+			streamIndex := stream.Index
+			return streamIndex, nil
 		}
 	}
 	err = errors.New("Could not find a video stream to use as master")
@@ -172,12 +171,13 @@ func (media *Convert) setupAudioConversion() {
 		} // end of switch
 	} else {
 		switch media.masterAudioStream.CodecName {
-		case "aac":
-			media.outAudio0 = "convert"
-			media.outAudio1 = "convert"
 		case "ac3":
 			media.outAudio0 = "convert"
 			media.outAudio1 = "copy"
+		case "aac":
+			fallthrough
+		case "truehd":
+			fallthrough
 		case "dts":
 			media.outAudio0 = "convert"
 			media.outAudio1 = "convert"
@@ -233,7 +233,6 @@ func suggestConvSettings(in string) {
 		return
 	}
 
-	media := new(Convert)
 	media.inFile = in
 
 	fmt.Printf(" Information about file: %s \n", fileFormat.Filename)
