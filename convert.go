@@ -33,13 +33,16 @@ func (buff *ffmpegOut) genVideoConversion() error {
 
 func (buff *ffmpegOut) genAudioConversion() error {
 
-	switch media.outAudio0 {
-	case "copy":
-		buff.Audio0 = fmt.Sprintf("-map 0:%d -c:a:0 copy ", media.masterAudioStream.Index)
-
-	case "convert":
-		// we need to figure out if this is multichannel
-
+	//
+	// This is the best case senerio.  We have an aac and an ac3 stream
+	//
+	if media.outAudio0 == "copy" && media.outAudio1 == "copy" {
+		buff.Audio0 = fmt.Sprintf("-map 0:%d -c:a:0 copy ", media.aacAudioStream.Index)
+		buff.Audio1 = fmt.Sprintf("-map 0:%d -c:a:1 copy ", media.masterAudioStream.Index)
+		return err
+	} else if media.outAudio0 == "convert" && media.outAudio1 == "convert" {
+		//Handle situation where all codecs need to be generated
+		//TODO Handle audio1 situation
 		if media.masterAudioStream.Channels > 2 {
 			// Output a 2 channel aac stream from the master audio which is a multichannel audio
 			// the asplit filter takes the input and splits it into 2 dual streams.  one called 2ch and another called 6ch
@@ -53,10 +56,23 @@ func (buff *ffmpegOut) genAudioConversion() error {
 			// if the master audio is NOT aac and is only 2 channel
 			buff.Audio0 = fmt.Sprintf("-map 0:%d -c:a:0 aac -b:a 256k ", media.masterAudioStream.Index)
 		}
+		return err
+	}
+
+	switch media.outAudio0 {
+	case "copy":
+		// This is a situation where the only audio available is an aac 2 channel
+		buff.Audio0 = fmt.Sprintf("-map 0:%d -c:a:0 copy ", media.masterAudioStream.Index)
+
+	case "convert":
+		// we need to figure out if this is multichannel
+		buff.Audio0 = fmt.Sprintf("-map 0:%d -c:a:0 aac -b:a 256k ", media.masterAudioStream.Index)
+
 	} // end of switch
 
 	switch media.outAudio1 {
 	case "copy":
+		// This situation is when we have an ac3 codec and we have to generate the aac codec
 		buff.Audio1 = fmt.Sprintf("-map 0:%d -c:a:1 copy ", media.masterAudioStream.Index)
 	case "convert":
 		//this is currently handled in case where numb audio streams > 2
@@ -89,5 +105,12 @@ func convertSource(in string) {
 	out := "-i " + in + ffmpegCmd.header + ffmpegCmd.Video + ffmpegCmd.Audio0 + ffmpegCmd.Audio1 + ffmpegCmd.outFile
 	fmt.Println("Sending to ffmpeg:")
 	fmt.Println(out)
+	err := checkFFmpegVersion()
+	if err != nil {
+		fmt.Println("Not sending commands to ffmpeg because: %s\n", err)
+		return
+	}
+
+	// Call ffmpeg here
 
 }

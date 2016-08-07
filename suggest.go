@@ -18,9 +18,27 @@ type Convert struct {
 	outFile           string
 	masterVideoStream *ffprobe.Stream
 	masterAudioStream *ffprobe.Stream
+	aacAudioStream    *ffprobe.Stream
 	outVideo          string
 	outAudio0         string
 	outAudio1         string
+}
+
+func checkforAACsecondaryAudio(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
+	// see if there are any ac3 5.1 surround sound streams we can use.
+	for _, stream := range fileStreams {
+		if stream.CodecType == "audio" {
+			if stream.Channels == 2 {
+				if stream.CodecName == "aac" {
+					streamIndex = stream.Index
+					return
+					//FOUND IT
+				}
+			}
+		}
+	} //end of search for master audio that we can just copy over and not transcode.
+	err = errors.New("Could not find secondary aac audio")
+	return
 }
 
 //
@@ -149,7 +167,7 @@ func (media *Convert) print() {
 //
 // Adding a method
 //
-func (media *Convert) setupAudioConversion() {
+func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
 
 	if media.masterAudioStream.Channels == 2 {
 		//
@@ -160,8 +178,14 @@ func (media *Convert) setupAudioConversion() {
 			media.outAudio0 = "copy"
 			media.outAudio1 = "none"
 		case "ac3":
-			media.outAudio0 = "convert"
-			media.outAudio1 = "none"
+			stream, err := checkforAACsecondaryAudio(fileStreams)
+			if err == nil {
+				media.outAudio0 = "convert"
+			} else {
+				media.aacAudioStream = fileStreams[stream]
+				media.outAudio0 = "copy"
+			}
+			media.outAudio1 = "copy"
 		case "dts":
 			media.outAudio0 = "convert"
 			media.outAudio1 = "none"
@@ -259,7 +283,7 @@ func suggestConvSettings(in string) {
 	fmt.Printf("Master Video codec: %s \n", Videostream.CodecName)
 	fmt.Printf("Master Audio codec: %s numChannels:%d\n", Audiostream.CodecName, Audiostream.Channels)
 
-	media.setupAudioConversion()
+	media.setupAudioConversion(fileStreams)
 	media.setupVideoConversion()
 	media.print()
 
