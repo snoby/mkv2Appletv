@@ -8,7 +8,8 @@ import (
 
 var (
 	app   = kingpin.New("mkv2Appletv", "Convert as efficiently as possible media to AppleTV mp4 format.")
-	debug = app.Flag("debug", "Enable debug mode.").Bool()
+	debug = app.Flag("debug", "Enable debug mode.").Short('d').Bool()
+	try   = app.Flag("try", "When set to true only the first 10 seconds of conversion will be done").Short('t').Bool()
 
 	show      = app.Command("show", "Using ffprobe show relavant information about a input file")
 	showinput = show.Arg("input", "Location of input File").Required().ExistingFile()
@@ -18,27 +19,29 @@ var (
 
 	convert      = app.Command("convert", "Take input and run ffmpeg to generate an optimal mp4 file")
 	convertinput = convert.Arg("input", "Location of input File").Required().ExistingFile()
+	outputFile   = convert.Arg("out", "Location of output mp4 File").ExistingDir()
+
+	check = app.Command("check", "log information about ffprobe and ffmpeg")
 )
 
 func main() {
 	var ()
 
-	kingpin.Version("0.0.2")
+	kingpin.Version("0.0.3")
 	app.UsageTemplate(kingpin.SeparateOptionalFlagsUsageTemplate)
-	//app.UsageTemplate(kingpin.DefaultUsageTemplate)
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 
 	case show.FullCommand():
-		println("Input file ", (*showinput))
 		showFFprobeInfo((*showinput))
 
 	case suggest.FullCommand():
-		println("Input file ", (*suggestinput))
 		suggestConvSettings((*suggestinput))
 
 	case convert.FullCommand():
-		println("Input file ", (*convertinput))
 		convertSource((*convertinput))
+
+	case check.FullCommand():
+		checkVersion()
 	}
 }
