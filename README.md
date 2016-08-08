@@ -203,3 +203,10 @@ frame=  242 fps=159 q=-1.0 Lsize=    5394kB time=00:00:10.01 bitrate=4411.7kbits
 video:4285kB audio:1096kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.243517%
 [aac @ 0x7f8cb403d000] Qavg: 153.092
 ```
+
+#### Demo of the app
+Here is an example of the app running with the -t option which only encodes the first 10 seconds of the video
+
+
+![](https://cloud.githubusercontent.com/assets/724760/17499799/d603494a-5d9d-11e6-8fac-1be62bd62d9f.gif)
+
