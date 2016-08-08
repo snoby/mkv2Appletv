@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
-	"os/exec"
 )
 
 var (
@@ -44,10 +42,10 @@ func (buff *ffmpegOut) genAudioConversion() error {
 	//
 	if media.outAudio0 == "copy" && media.outAudio1 == "copy" {
 		map0 := fmt.Sprintf("0:%d", media.aacAudioStream.Index)
-		buff.Audio0 = fmt.Sprintf("-c:a:0 copy ")
+		buff.Audio0 = fmt.Sprintf("-c:a:0")
 		map1 := fmt.Sprintf("0:%d", media.masterAudioStream.Index)
-		buff.Audio1 = fmt.Sprintf("-c:a:1 copy ")
-		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", map0, buff.Audio0, "-map", map1, buff.Audio1)
+		buff.Audio1 = fmt.Sprintf("-c:a:1")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", map0, buff.Audio0, "copy", "-map", map1, buff.Audio1, "copy")
 
 		return err
 	} else if media.outAudio0 == "convert" && media.outAudio1 == "convert" {
@@ -77,8 +75,8 @@ func (buff *ffmpegOut) genAudioConversion() error {
 	case "copy":
 		// This is a situation where the only audio available is an aac 2 channel
 		map0 := fmt.Sprintf("0:%d", media.masterAudioStream.Index)
-		buff.Audio0 = fmt.Sprintf("-c:a:0 copy ")
-		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", map0, buff.Audio0)
+		buff.Audio0 = fmt.Sprintf("-c:a:0")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", map0, buff.Audio0, "copy")
 
 	case "convert":
 		// we need to figure out if this is multichannel
@@ -90,7 +88,6 @@ func (buff *ffmpegOut) genAudioConversion() error {
 	switch media.outAudio1 {
 	case "copy":
 		// This situation is when we have an ac3 codec and we have to generate the aac codec
-		buff.Audio1 = fmt.Sprintf("-map 0:%d -c:a:1 copy", media.masterAudioStream.Index)
 		map1 := fmt.Sprintf("0:%d", media.masterAudioStream.Index)
 		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", map1, "-c:a:1", "copy")
 	case "convert":
@@ -111,7 +108,7 @@ func (buff *ffmpegOut) setupHeader() {
 
 }
 
-func convertSource(in string) {
+func convertSource(in string, output string) {
 
 	suggestConvSettings(in)
 	// Media object is now setup
@@ -122,15 +119,18 @@ func convertSource(in string) {
 	}
 	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-hide_banner", "-y", "-i", in)
 
-	ffmpegCmd.outFile = fmt.Sprintf("/Users/snoby/result.mp4")
+	if output != "" {
+		ffmpegCmd.outFile = output
+	} else {
+		ffmpegCmd.outFile = fmt.Sprintf("%s.mp4", in)
+	}
+
 	ffmpegCmd.setupHeader()
 	ffmpegCmd.genVideoConversion()
 	ffmpegCmd.genAudioConversion()
 	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, ffmpegCmd.outFile)
 
 	// Format String to send to ffmpeg
-	//	out := "-y -i " + in + ffmpegCmd.header + ffmpegCmd.Video + ffmpegCmd.Audio0 + ffmpegCmd.Audio1 + ffmpegCmd.outFile
-	//	out = strconv.QuoteToASCII(out)
 	fmt.Printf("%v", ffmpegCmd.ffArgs)
 
 	err := checkFFmpegVersion()
@@ -139,19 +139,10 @@ func convertSource(in string) {
 		return
 	}
 
-	fmt.Println("Sending to ffmpeg:")
-	//fmt.Println(out)
-	// Call ffmpeg here
-
-	//result, err := exec.Command("ffmpeg", "-i", in, ffmpegCmd.header, ffmpegCmd.Video, ffmpegCmd.Audio0, ffmpegCmd.Audio1, ffmpegCmd.outFile).CombinedOutput()
-	//cmd := exec.Command("ffmpeg", out)
-	cmd := exec.Command("ffmpeg", ffmpegCmd.ffArgs...)
-	fmt.Printf("\n%v\n", cmd)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	cmd.Run()
+	_, err = callFFmpeg(ffmpegCmd)
+	if err != nil {
+		fmt.Println("Error executing ffmpeg call\n")
+	}
 
 }
 
@@ -164,3 +155,10 @@ func convertSource(in string) {
 // 		"-c:a:1", "copy",
 // 		"/Users/snoby/result.mp4")
 //
+// 	cmd := exec.Command("ffmpeg", ffmpegCmd.ffArgs...)
+// 	fmt.Printf("\n%v\n", cmd)
+//
+// 	cmd.Stdout = os.Stdout
+// 	cmd.Stderr = os.Stderr
+//
+// 	cmd.Run()

@@ -38,7 +38,7 @@ func checkforAACsecondaryAudio(fileStreams []*ffprobe.Stream) (streamIndex int, 
 		}
 	} //end of search for master audio that we can just copy over and not transcode.
 	err = errors.New("Could not find secondary aac audio")
-	return
+	return -1, err
 }
 
 //
@@ -178,14 +178,17 @@ func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
 			media.outAudio0 = "copy"
 			media.outAudio1 = "none"
 		case "ac3":
+			fmt.Println("Found ac3 Master audio...")
 			stream, err := checkforAACsecondaryAudio(fileStreams)
-			if err == nil {
+			if err != nil {
 				media.outAudio0 = "convert"
+				media.outAudio1 = "none"
 			} else {
+				//Not really sure how this can happen
 				media.aacAudioStream = fileStreams[stream]
 				media.outAudio0 = "copy"
 			}
-			media.outAudio1 = "copy"
+			media.outAudio1 = "none"
 		case "dts":
 			media.outAudio0 = "convert"
 			media.outAudio1 = "none"
@@ -194,10 +197,20 @@ func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
 
 		} // end of switch
 	} else {
+		// The Master Audio has surround sound
 		switch media.masterAudioStream.CodecName {
 		case "ac3":
-			media.outAudio0 = "convert"
-			media.outAudio1 = "copy"
+			stream, err := checkforAACsecondaryAudio(fileStreams)
+			if err != nil {
+				// This means we didn't find an aac alternate
+				media.outAudio0 = "convert"
+			} else {
+				// we found the aac 2 channel stream
+				media.aacAudioStream = fileStreams[stream]
+				media.outAudio0 = "copy"
+				media.outAudio1 = "copy"
+			}
+
 		case "aac":
 			fallthrough
 		case "truehd":

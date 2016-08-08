@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 )
@@ -80,26 +81,17 @@ func checkFFmpegVersion() error {
 	return err
 }
 
-//
-// // add stats: -stats
-// func callFFmpeg(cmd Cmd) (string, error) {
-//
-// 	//fmt.Printf("%s", args)
-// 	// var err error
-// 	//cmd := exec.Command("ffmpeg", args)
-// 	fmt.Printf("%v", cmd)
-//
-// 	fmt.Println("About to start\n")
-//
-// 	err = cmd.Start()
-// 	if err != nil {
-// 		fmt.Printf("Error starting program: %s\n", err)
-// 	}
-// 	fmt.Println("About to wait\n")
-// 	err = cmd.Wait()
-// 	if err != nil {
-// 		fmt.Printf("Error waiting for  program: %s\n", err)
-// 	}
-//
-// 	return "Success", err
-// }
+// add stats: -stats
+func callFFmpeg(ffmpegCmd *ffmpegOut) (string, error) {
+
+	fmt.Println("About to start\n")
+	cmd := exec.Command("ffmpeg", ffmpegCmd.ffArgs...)
+	fmt.Printf("\n%v\n", cmd)
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	cmd.Run()
+
+	return "Success", err
+}

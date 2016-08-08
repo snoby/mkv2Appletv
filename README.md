@@ -18,23 +18,36 @@ I also wanted to learn the golang programming language.  So in my freetime I wro
 
 ### Usage
 ```
-usage: mkv2Appletv [<flags>] <command> [<args> ...]
+usage: mkv2Appletv --input=INPUT [<flags>] <command> [<args> ...]
 
 Convert as efficiently as possible media to AppleTV mp4 format.
 
-Optional flags:
-  --help   Show context-sensitive help (also try --help-long and --help-man).
-  --debug  Enable debug mode.
+Flags:
+      --help           Show context-sensitive help (also try --help-long and --help-man).
+  -d, --debug          Enable debug mode.
+  -t, --try            When set to true only the first 10 seconds of conversion will be done
+  -i, --input=INPUT    Location of input File
+  -o, --output=OUTPUT  Location of output mp4 File (not required, if not set output file name will be input filename +.mp4)
 
 Commands:
   help [<command>...]
     Show help.
 
-  show <input>
+
+  show
     Using ffprobe show relavant information about a input file
 
-  suggest <input>
+
+  suggest
     Show what the suggested output of the transformation would look like.
+
+
+  convert
+    Take input and run ffmpeg to generate an optimal mp4 file
+
+
+  check
+    log information about ffprobe and ffmpeg
 ```
 #### show command
 The dump below shows that we have a video file that has an h264 video stream with 2 audio's an aac 2 channel and an ac3 2 channel, it has subtitles and stream metadata along with artwork.
