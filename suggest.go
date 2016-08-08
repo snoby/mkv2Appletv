@@ -31,6 +31,7 @@ func checkforAACsecondaryAudio(fileStreams []*ffprobe.Stream) (streamIndex int, 
 			if stream.Channels == 2 {
 				if stream.CodecName == "aac" {
 					streamIndex = stream.Index
+					fmt.Printf("Found a 2 channel aac stream")
 					return
 					//FOUND IT
 				}
@@ -204,6 +205,7 @@ func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
 			if err != nil {
 				// This means we didn't find an aac alternate
 				media.outAudio0 = "convert"
+				media.outAudio1 = "copy"
 			} else {
 				// we found the aac 2 channel stream
 				media.aacAudioStream = fileStreams[stream]
