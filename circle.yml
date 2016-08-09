@@ -1,0 +1,17 @@
+dependencies:
+  pre:
+    - curl -O http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
+    - tar xz ffmpeg-release-64bit-static.tar.xz
+    - mkdir -p ~/bin/
+    - cp -rf ffmpeg-3.1.1-64bit-static/ff* ~/bin/
+    - chmod +x ~/bin/ff*
+    - echo "installed ffmpeg"
+    - curl -O http://www.sample-videos.com/video/mkv/720/big_buck_bunny_720p_2mb.mkv
+
+test:
+  post:
+    - ./mkv2Appletv --help-long
+    - ./mkv2Appletv -i ~/big_buck_bunny_720p_2mb.mkv show
+    - ./mkv2Appletv -i ~/big_buck_bunny_720p_2mb.mkv suggest
+    - ./mkv2Appletv -i -t -d ~/big_buck_bunny_720p_2mb.mkv convert
+

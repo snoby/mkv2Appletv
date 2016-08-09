@@ -1,5 +1,5 @@
 # mkv2Appletv
-
+[![CircleCI](https://circleci.com/gh/snoby/mkv2Appletv/tree/master.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/snoby/mkv2Appletv/tree/master)
 
 ## Why
 I've always wanted to find a program like ffmepgtools that would automatically convert any video files I downloaded to the format / codecs that would play on the appleTV.  Specifically look at the input streams available and output the best quality mp4 videos as fast as possible.
