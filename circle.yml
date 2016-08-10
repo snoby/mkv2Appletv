@@ -1,12 +1,13 @@
 dependencies:
   pre:
-    - curl -O http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
-    - tar xf ffmpeg-release-64bit-static.tar.xz
     - mkdir -p ~/bin/
-    - cp -rf ffmpeg-3.1.1-64bit-static/ff* ~/bin/
+    - cd ~/bin
+    - curl -O http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
+    - tar xf ffmpeg-release-64bit-static.tar.xz --strip=1
     - chmod +x ~/bin/ff*
-    - echo "installed ffmpeg"
+    - cd ~
     - curl -O http://www.sample-videos.com/video/mkv/720/big_buck_bunny_720p_2mb.mkv
+    - cd ~/mkv2Appletv
 
 test:
   post:
