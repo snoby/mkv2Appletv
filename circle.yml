@@ -1,7 +1,7 @@
 dependencies:
   pre:
     - curl -O http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
-    - tar xz ffmpeg-release-64bit-static.tar.xz
+    - tar xf ffmpeg-release-64bit-static.tar.xz
     - mkdir -p ~/bin/
     - cp -rf ffmpeg-3.1.1-64bit-static/ff* ~/bin/
     - chmod +x ~/bin/ff*
