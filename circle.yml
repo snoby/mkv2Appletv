@@ -13,5 +13,5 @@ test:
     - ./mkv2Appletv --help-long
     - ./mkv2Appletv -i ~/big_buck_bunny_720p_2mb.mkv show
     - ./mkv2Appletv -i ~/big_buck_bunny_720p_2mb.mkv suggest
-    - ./mkv2Appletv -i -t -d ~/big_buck_bunny_720p_2mb.mkv convert
+    - ./mkv2Appletv -t -d -i ~/big_buck_bunny_720p_2mb.mkv convert
 
