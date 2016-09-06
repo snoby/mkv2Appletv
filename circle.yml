@@ -1,9 +1,7 @@
 dependencies:
   pre:
-    - curl -L -o $HOME/bin/ffmpeg-release-64bit-static.tar.xz  http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
-    - tar xf $HOME/bin/ffmpeg-release-64bit-static.tar.xz --strip=1 -C $HOME/bin/
-    - ls -lah $HOME/bin/
-    - chmod +x $HOME/bin/ff*
+    - add-apt-repository ppa:mc3man/trusty-media
+    - apt-get update && apt-get dist-upgrade &&  install ffmpeg
     - curl -L -o $HOME/big_buck_bunny_720p_2mb.mkv http://www.sample-videos.com/video/mkv/720/big_buck_bunny_720p_2mb.mkv
     - cd $HOME/$CIRCLE_PROJECT_REPONAME
 
