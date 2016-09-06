@@ -84,6 +84,8 @@ func masterAudio(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 					fallthrough
 				case "aac":
 					fallthrough
+				case "dca":
+					fallthrough
 				case "dts":
 					streamIndex = stream.Index
 					return
@@ -216,6 +218,8 @@ func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
 		case "aac":
 			fallthrough
 		case "truehd":
+			fallthrough
+		case "dca":
 			fallthrough
 		case "dts":
 			media.outAudio0 = "convert"
