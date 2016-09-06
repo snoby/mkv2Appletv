@@ -1,7 +1,9 @@
 dependencies:
   pre:
     - sudo add-apt-repository -y ppa:mc3man/trusty-media
-    - sudo apt-get update && sudo apt-get install -y ffmpeg
+    - sudo add-apt-repository -y ppa:hectane/go-1.6
+    - sudo apt-get update
+    - sudo apt-get install -y ffmpeg golang
     - curl -L -o $HOME/big_buck_bunny_720p_2mb.mkv http://www.sample-videos.com/video/mkv/720/big_buck_bunny_720p_2mb.mkv
     - cd $HOME/$CIRCLE_PROJECT_REPONAME
 
