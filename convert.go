@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+
+	"github.com/fatih/color"
 )
 
 var (
@@ -20,18 +22,18 @@ type ffmpegOut struct {
 
 func (buff *ffmpegOut) genVideoConversion() error {
 
-	temp := fmt.Sprintf("0:%d", media.masterVideoStream.Index)
+	temp := fmt.Sprintf(" -map 0:%d -c:v", media.masterVideoStream.Index)
 	switch media.outVideo {
 
 	case "copy":
-		buff.Video = fmt.Sprintf("copy")
+		buff.Video = fmt.Sprintf(" copy")
 	case "convert":
 		buff.Video = fmt.Sprintf("libx264 -preset slow -crf 20 -profile:v high -level 4.0 ")
 	default:
 		err := errors.New("unknown or not set Video settings\n")
 		return err
 	} // end of switch
-	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", temp, "-c:v", buff.Video)
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, temp, buff.Video)
 	return err
 }
 
@@ -45,7 +47,7 @@ func (buff *ffmpegOut) genAudioConversion() error {
 		buff.Audio0 = fmt.Sprintf("-c:a:0")
 		map1 := fmt.Sprintf("0:%d", media.masterAudioStream.Index)
 		buff.Audio1 = fmt.Sprintf("-c:a:1")
-		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", map0, buff.Audio0, "copy", "-map", map1, buff.Audio1, "copy")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, " -map", map0, buff.Audio0, "copy", "-map", map1, buff.Audio1, "copy")
 
 		return err
 	} else if media.outAudio0 == "convert" && media.outAudio1 == "convert" {
@@ -57,16 +59,15 @@ func (buff *ffmpegOut) genAudioConversion() error {
 			// the asplit filter takes the input and splits it into 2 dual streams.  one called 2ch and another called 6ch
 			// The 2ch is fed into the pan filter and the output is placed into the "aac" pad
 			//
-			buff.Audio0 = fmt.Sprintf("[0:%d]asplit[2ch][6ch];[2ch]pan=stereo|FL=FC+0.6FL+0.2BL|FR=FC+0.6FR+0.2BR[aac]", media.masterAudioStream.Index)
-			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-filter_complex", buff.Audio0)
+			buff.Audio0 = fmt.Sprintf("-filter_complex [0:%d]asplit[2ch][6ch];[2ch]pan=stereo|FL=FC+0.6FL+0.2BL|FR=FC+0.6FR+0.2BR[aac]", media.masterAudioStream.Index)
+			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, buff.Audio0)
 			// Now append the output pad mappings [aac] and [6ch]
 			// if the 6ch is NOT ac3 we will have to transcode it.
-			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", "[aac]", "-map", "[6ch]", "-c:a:0", "aac", "-c:a:1", "ac3")
+			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map [aac]", "-map", "[6ch]", "-c:a:0", "aac", "-c:a:1", "ac3")
 		} else {
 			// if the master audio is NOT aac and is only 2 channel
 			buff.Audio0 = fmt.Sprintf("-map 0:%d -c:a:0 aac -b:a 256k", media.masterAudioStream.Index)
-			map0 := fmt.Sprintf("0:%d", media.masterAudioStream.Index)
-			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", map0, "-c:a:0", "aac", "-b:a", "256k")
+			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, buff.Audio0)
 		}
 		return err
 	}
@@ -101,9 +102,9 @@ func (buff *ffmpegOut) genAudioConversion() error {
 }
 func (buff *ffmpegOut) setupHeader() {
 
-	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map_metadata", "0:g")
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map_metadata 0:g")
 	if *try == true {
-		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-t", "00:00:10")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-t 00:00:10")
 	}
 
 }
@@ -115,14 +116,15 @@ func convertSource(in string, output string) {
 
 	// Do we need to handle additional debugging?
 	if *debug == true {
-		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-report", "-loglevel", "verbose")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v trace")
 	}
-	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-hide_banner", "-y", "-i", in)
+	temp := fmt.Sprintf(" -i %s", in)
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-hide_banner", "-y", temp)
 
 	if output != "" {
 		ffmpegCmd.outFile = output
 	} else {
-		ffmpegCmd.outFile = fmt.Sprintf("%s.mp4", in)
+		ffmpegCmd.outFile = fmt.Sprintf(" %s.mp4", in)
 	}
 
 	ffmpegCmd.setupHeader()
@@ -137,6 +139,12 @@ func convertSource(in string, output string) {
 	if err != nil {
 		fmt.Println("Not sending commands to ffmpeg because: %s\n", err)
 		return
+	}
+
+	color.Blue("\n\nType: %T\n%#v\n\n", ffmpegCmd.ffArgs, ffmpegCmd.ffArgs)
+
+	for i := 0; i < len(ffmpegCmd.ffArgs); i++ {
+		fmt.Printf("%s\n", ffmpegCmd.ffArgs[i])
 	}
 
 	_, err = callFFmpeg(ffmpegCmd)

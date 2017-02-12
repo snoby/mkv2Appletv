@@ -86,7 +86,7 @@ func callFFmpeg(ffmpegCmd *ffmpegOut) (string, error) {
 
 	fmt.Println("About to start\n")
 	cmd := exec.Command("ffmpeg", ffmpegCmd.ffArgs...)
-	fmt.Printf("\n%v\n", cmd)
+	fmt.Printf("\n%#v\n", cmd)
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
