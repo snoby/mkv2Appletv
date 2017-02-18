@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-
-	"github.com/fatih/color"
 )
 
 var (
@@ -133,10 +131,28 @@ func convertSource(in string, output string) {
 
 	// Do we need to handle additional debugging?
 	if *debug == true {
-		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v", "debug")
+
+		//Possible levels are numbers are:
+		// "quiet"
+		// "panic"
+		// "fatal"
+		// "error"
+		// "warning"
+		// "info"
+		// "verbose"
+		// "debug"
+		// "trace"
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v", "verbose")
+	} else {
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v", "warning")
 	}
+
+	//
+	// Throw in some extra options to not show the banner, and to show some
+	// conversion statics... Maybe we should capture the output and put in a process bar?...
+	//
 	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-i", in)
-	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-hide_banner", "-y")
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-hide_banner", "-y", "-stats")
 
 	if output != "" {
 		ffmpegCmd.outFile = output
@@ -149,20 +165,17 @@ func convertSource(in string, output string) {
 	ffmpegCmd.genAudioConversion()
 	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, ffmpegCmd.outFile)
 
-	// Format String to send to ffmpeg
-	fmt.Printf("%v", ffmpegCmd.ffArgs)
-
 	err := checkFFmpegVersion()
 	if err != nil {
 		fmt.Println("Not sending commands to ffmpeg because: %s\n", err)
 		return
 	}
 
-	color.Blue("\n\nType: %T\n%#v\n\n", ffmpegCmd.ffArgs, ffmpegCmd.ffArgs)
-
-	for i := 0; i < len(ffmpegCmd.ffArgs); i++ {
-		fmt.Printf("%s\n", ffmpegCmd.ffArgs[i])
-	}
+	// debug to dump the entire structure
+	//	color.Blue("\n\nType: %T\n%#v\n\n", ffmpegCmd.ffArgs, ffmpegCmd.ffArgs)
+	// for i := 0; i < len(ffmpegCmd.ffArgs); i++ {
+	// 	fmt.Printf("%s\n", ffmpegCmd.ffArgs[i])
+	// }
 
 	_, err = callFFmpeg(ffmpegCmd)
 	if err != nil {
@@ -170,20 +183,3 @@ func convertSource(in string, output string) {
 	}
 
 }
-
-//   works
-// 	cmd := exec.Command("ffmpeg", "-hide_banner", "-y", "-i", "/Users/snoby/Public/public/JL.mkv",
-// 		"-t", "00:00:10", "-report", "-loglevel", "verbose",
-// 		"-map", "0:0", "-map", "0:1", "-map", "0:1",
-// 		"-c:v", "copy",
-// 		"-c:a:0", "aac", "-b:a:0", "256k",
-// 		"-c:a:1", "copy",
-// 		"/Users/snoby/result.mp4")
-//
-// 	cmd := exec.Command("ffmpeg", ffmpegCmd.ffArgs...)
-// 	fmt.Printf("\n%v\n", cmd)
-//
-// 	cmd.Stdout = os.Stdout
-// 	cmd.Stderr = os.Stderr
-//
-// 	cmd.Run()

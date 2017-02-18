@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+
+	"github.com/fatih/color"
 )
 
 func checkVersion() {
@@ -84,9 +86,10 @@ func checkFFmpegVersion() error {
 // add stats: -stats
 func callFFmpeg(ffmpegCmd *ffmpegOut) (string, error) {
 
-	fmt.Println("About to start\n")
+	color.Yellow("Starting conversion")
 	cmd := exec.Command("ffmpeg", ffmpegCmd.ffArgs...)
-	fmt.Printf("\n%#v\n", cmd)
+	//Debug
+	//fmt.Printf("\n%#v\n", cmd)
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
