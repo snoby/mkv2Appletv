@@ -196,7 +196,7 @@ func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
 			media.outAudio0 = "convert"
 			media.outAudio1 = "none"
 		default:
-			fmt.Println("Not sure what to do with this codec: %s", media.masterAudioStream.CodecName)
+			fmt.Printf("Not sure what to do with this codec: %s", media.masterAudioStream.CodecName)
 
 		} // end of switch
 	} else {
@@ -225,7 +225,7 @@ func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
 			media.outAudio0 = "convert"
 			media.outAudio1 = "convert"
 		default:
-			fmt.Println("Not sure what to do with this codec: %s", media.masterAudioStream.CodecName)
+			fmt.Printf("Not sure what to do with this codec: %s", media.masterAudioStream.CodecName)
 
 		} // end of switch
 

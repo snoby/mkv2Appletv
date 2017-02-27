@@ -44,7 +44,7 @@ func (buff *ffmpegOut) genVideoConversion() error {
 		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "4.0")
 
 	default:
-		err := errors.New("unknown or not set Video settings\n")
+		err := errors.New("unknown or not set Video settings")
 		return err
 	} // end of switch
 	return err
@@ -167,7 +167,7 @@ func convertSource(in string, output string) {
 
 	err := checkFFmpegVersion()
 	if err != nil {
-		fmt.Println("Not sending commands to ffmpeg because: %s\n", err)
+		fmt.Printf("Not sending commands to ffmpeg because: %s\n", err)
 		return
 	}
 
@@ -179,7 +179,7 @@ func convertSource(in string, output string) {
 
 	_, err = callFFmpeg(ffmpegCmd)
 	if err != nil {
-		fmt.Println("Error executing ffmpeg call\n")
+		fmt.Printf("Error executing ffmpeg call\n")
 	}
 
 }
