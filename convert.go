@@ -19,19 +19,34 @@ type ffmpegOut struct {
 }
 
 func (buff *ffmpegOut) genVideoConversion() error {
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map")
 
 	temp := fmt.Sprintf("0:%d", media.masterVideoStream.Index)
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, temp)
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-c:v")
+
 	switch media.outVideo {
 
 	case "copy":
-		buff.Video = fmt.Sprintf("copy")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "copy")
 	case "convert":
-		buff.Video = fmt.Sprintf("libx264 -preset slow -crf 20 -profile:v high -level 4.0 ")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "libx264")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-preset")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "slow")
+
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-crf")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "20")
+
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-profile:v")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "high")
+
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-level")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "4.0")
+
 	default:
-		err := errors.New("unknown or not set Video settings\n")
+		err := errors.New("unknown or not set Video settings")
 		return err
 	} // end of switch
-	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", temp, "-c:v", buff.Video)
 	return err
 }
 
@@ -45,7 +60,8 @@ func (buff *ffmpegOut) genAudioConversion() error {
 		buff.Audio0 = fmt.Sprintf("-c:a:0")
 		map1 := fmt.Sprintf("0:%d", media.masterAudioStream.Index)
 		buff.Audio1 = fmt.Sprintf("-c:a:1")
-		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", map0, buff.Audio0, "copy", "-map", map1, buff.Audio1, "copy")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map")
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, map0, buff.Audio0, "copy", "-map", map1, buff.Audio1, "copy")
 
 		return err
 	} else if media.outAudio0 == "convert" && media.outAudio1 == "convert" {
@@ -57,16 +73,16 @@ func (buff *ffmpegOut) genAudioConversion() error {
 			// the asplit filter takes the input and splits it into 2 dual streams.  one called 2ch and another called 6ch
 			// The 2ch is fed into the pan filter and the output is placed into the "aac" pad
 			//
+			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-filter_complex")
 			buff.Audio0 = fmt.Sprintf("[0:%d]asplit[2ch][6ch];[2ch]pan=stereo|FL=FC+0.6FL+0.2BL|FR=FC+0.6FR+0.2BR[aac]", media.masterAudioStream.Index)
-			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-filter_complex", buff.Audio0)
+			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, buff.Audio0)
 			// Now append the output pad mappings [aac] and [6ch]
 			// if the 6ch is NOT ac3 we will have to transcode it.
 			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", "[aac]", "-map", "[6ch]", "-c:a:0", "aac", "-c:a:1", "ac3")
 		} else {
 			// if the master audio is NOT aac and is only 2 channel
 			buff.Audio0 = fmt.Sprintf("-map 0:%d -c:a:0 aac -b:a 256k", media.masterAudioStream.Index)
-			map0 := fmt.Sprintf("0:%d", media.masterAudioStream.Index)
-			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", map0, "-c:a:0", "aac", "-b:a", "256k")
+			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, buff.Audio0)
 		}
 		return err
 	}
@@ -115,14 +131,33 @@ func convertSource(in string, output string) {
 
 	// Do we need to handle additional debugging?
 	if *debug == true {
-		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-report", "-loglevel", "verbose")
+
+		//Possible levels are numbers are:
+		// "quiet"
+		// "panic"
+		// "fatal"
+		// "error"
+		// "warning"
+		// "info"
+		// "verbose"
+		// "debug"
+		// "trace"
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v", "verbose")
+	} else {
+		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v", "warning")
 	}
-	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-hide_banner", "-y", "-i", in)
+
+	//
+	// Throw in some extra options to not show the banner, and to show some
+	// conversion statics... Maybe we should capture the output and put in a process bar?...
+	//
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-i", in)
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-hide_banner", "-y", "-stats")
 
 	if output != "" {
 		ffmpegCmd.outFile = output
 	} else {
-		ffmpegCmd.outFile = fmt.Sprintf("%s.mp4", in)
+		ffmpegCmd.outFile = fmt.Sprintf(" %s.mp4", in)
 	}
 
 	ffmpegCmd.setupHeader()
@@ -130,35 +165,21 @@ func convertSource(in string, output string) {
 	ffmpegCmd.genAudioConversion()
 	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, ffmpegCmd.outFile)
 
-	// Format String to send to ffmpeg
-	fmt.Printf("%v", ffmpegCmd.ffArgs)
-
 	err := checkFFmpegVersion()
 	if err != nil {
-		fmt.Println("Not sending commands to ffmpeg because: %s\n", err)
+		fmt.Printf("Not sending commands to ffmpeg because: %s\n", err)
 		return
 	}
 
+	// debug to dump the entire structure
+	//	color.Blue("\n\nType: %T\n%#v\n\n", ffmpegCmd.ffArgs, ffmpegCmd.ffArgs)
+	// for i := 0; i < len(ffmpegCmd.ffArgs); i++ {
+	// 	fmt.Printf("%s\n", ffmpegCmd.ffArgs[i])
+	// }
+
 	_, err = callFFmpeg(ffmpegCmd)
 	if err != nil {
-		fmt.Println("Error executing ffmpeg call\n")
+		fmt.Printf("Error executing ffmpeg call\n")
 	}
 
 }
-
-//   works
-// 	cmd := exec.Command("ffmpeg", "-hide_banner", "-y", "-i", "/Users/snoby/Public/public/JL.mkv",
-// 		"-t", "00:00:10", "-report", "-loglevel", "verbose",
-// 		"-map", "0:0", "-map", "0:1", "-map", "0:1",
-// 		"-c:v", "copy",
-// 		"-c:a:0", "aac", "-b:a:0", "256k",
-// 		"-c:a:1", "copy",
-// 		"/Users/snoby/result.mp4")
-//
-// 	cmd := exec.Command("ffmpeg", ffmpegCmd.ffArgs...)
-// 	fmt.Printf("\n%v\n", cmd)
-//
-// 	cmd.Stdout = os.Stdout
-// 	cmd.Stderr = os.Stderr
-//
-// 	cmd.Run()
