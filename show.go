@@ -1,4 +1,4 @@
-package main
+package mkv2Appletv
 
 import (
 	"fmt"
