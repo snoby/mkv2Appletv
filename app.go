@@ -19,8 +19,11 @@ var (
 	check   = app.Command("check", "log information about ffprobe and ffmpeg")
 )
 
-func app() {
-	var ()
+func EntryPoint(argc int, argv []string) int {
+	var (
+		retValue int
+	)
+	retValue = 0
 
 	kingpin.Version("0.0.4")
 	app.UsageTemplate(kingpin.SeparateOptionalFlagsUsageTemplate)
@@ -39,4 +42,5 @@ func app() {
 	case check.FullCommand():
 		checkVersion()
 	}
+	return retValue
 }

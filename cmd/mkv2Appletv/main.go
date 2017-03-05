@@ -1,8 +1,8 @@
 package main
 
-var ()
-
 func main() {
 	var ()
+
+	Entrypoint(argc, argv)
 
 }
