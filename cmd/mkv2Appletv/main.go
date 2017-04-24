@@ -1,8 +1,10 @@
 package main
 
+import mta "github.com/snoby/mkv2Appletv"
+
 func main() {
 	var ()
 
-	Entrypoint(argc, argv)
+	err := mta.Entrypoint(1)
 
 }

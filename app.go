@@ -19,7 +19,7 @@ var (
 	check   = app.Command("check", "log information about ffprobe and ffmpeg")
 )
 
-func EntryPoint(argc int, argv []string) int {
+func EntryPoint(in int) int {
 	var (
 		retValue int
 	)
