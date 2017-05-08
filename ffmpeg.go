@@ -94,7 +94,10 @@ func callFFmpeg(ffmpegCmd *ffmpegOut) (string, error) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("Execution had the following error %v\n", err)
+	}
 
 	return "Success", err
 }
