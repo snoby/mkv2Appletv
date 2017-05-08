@@ -79,7 +79,7 @@ func (buff *ffmpegOut) genAudioConversion() error {
 			// Now append the output pad mappings [aac] and [6ch]
 			// if the 6ch is NOT ac3 we will have to transcode it.
 			//# TODO if the DTS is only 2 channel set the ac3 bit rate down to 256k.
-			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", "[aac]", "-map", "[6ch]", "-c:a:0", "aac", "-c:a:1", "ac3", "-b:a", "384k")
+			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-map", "[aac]", "-map", "[6ch]", "-c:a:0", "aac", "-c:a:1", "ac3")
 		} else {
 			// if the master audio is NOT aac and is only 2 channel
 			buff.Audio0 = fmt.Sprintf("-map 0:%d -c:a:0 aac -b:a 256k", media.masterAudioStream.Index)
@@ -162,11 +162,19 @@ func convertSource(in string, output string) {
 	}
 
 	ffmpegCmd.setupHeader()
-	ffmpegCmd.genVideoConversion()
-	ffmpegCmd.genAudioConversion()
+	err = ffmpegCmd.genVideoConversion()
+	if err != nil {
+		fmt.Printf("Error setting up Video Conversion : %v\n", err)
+		return
+	}
+	err = ffmpegCmd.genAudioConversion()
+	if err != nil {
+		fmt.Printf("Error setting up Audio Conversion : %v\n", err)
+		return
+	}
 	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, ffmpegCmd.outFile)
 
-	err := checkFFmpegVersion()
+	err = checkFFmpegVersion()
 	if err != nil {
 		fmt.Printf("Not sending commands to ffmpeg because: %s\n", err)
 		return
