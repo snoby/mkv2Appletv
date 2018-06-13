@@ -126,6 +126,9 @@ func masterAudio(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 				switch stream.CodecName {
 				case "truehd":
 					fallthrough
+        case "mp3":
+          streamIndex = stream.Index
+          return
 				case "dts":
 					streamIndex = stream.Index
 					return
@@ -195,6 +198,9 @@ func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
 		case "dts":
 			media.outAudio0 = "convert"
 			media.outAudio1 = "none"
+    case "mp3":
+      media.outAudio0 = "convert"
+      media.outAudio1 = "none"
 		default:
 			fmt.Printf("Not sure what to do with this codec: %s", media.masterAudioStream.CodecName)
 
