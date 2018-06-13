@@ -22,7 +22,7 @@ var (
 func main() {
 	var ()
 
-	kingpin.Version("0.0.5")
+	kingpin.Version("0.0.7")
 	app.UsageTemplate(kingpin.SeparateOptionalFlagsUsageTemplate)
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
