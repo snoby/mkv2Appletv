@@ -8,7 +8,7 @@ BUILD=`git rev-parse HEAD`
 VERSION='0.0.7'
 
 LDFLAGS=-ldflags "-X main.Build=${BUILD}"
-GOTHUB_OPTIONS="--user snoby --repo mkv2Appletv --tag ${VERSION}"
+GOTHUB_OPTIONS=--user snoby --repo mkv2Appletv --tag ${VERSION}
 # this makefile uses gothub so your env needs to have the personal access token to upload the release files.
 
 .DEFAULT_TARGET: ${BIN}
@@ -17,7 +17,7 @@ GOTHUB_OPTIONS="--user snoby --repo mkv2Appletv --tag ${VERSION}"
 github_release: clean install release
 	git tag ${VERSION} 
 	git push --tags
-	gothub release ${GOTHUB_OPTIONS}
+	gothub  release ${GOTHUB_OPTIONS}
 	gothub upload ${GOTHUB_OPTIONS} --file release/mkv2Appletv-darwin-amd64 --name mkv2Appletv-darwin-amd64
 	gothub upload ${GOTHUB_OPTIONS} --file release/mkv2Appletv-linux-amd64 --name mkv2Appletv-linux-amd64
 
