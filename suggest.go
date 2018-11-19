@@ -89,6 +89,9 @@ func masterAudio(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
 				case "dts":
 					streamIndex = stream.Index
 					return
+				case "eac3":
+					streamIndex = stream.Index
+					return
 
 				} // end of switch
 			} // end of multi channel
@@ -129,6 +132,9 @@ func masterAudio(fileStreams []*ffprobe.Stream) (streamIndex int, err error) {
         case "mp3":
           streamIndex = stream.Index
           return
+				case "eac3":
+					streamIndex = stream.Index
+					return
 				case "dts":
 					streamIndex = stream.Index
 					return
@@ -201,6 +207,9 @@ func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
     case "mp3":
       media.outAudio0 = "convert"
       media.outAudio1 = "none"
+		case "eac3":
+			media.outAudio0 = "convert"
+			media.outAudio1 = "none"
 		default:
 			fmt.Printf("Not sure what to do with this codec: %s", media.masterAudioStream.CodecName)
 
@@ -228,6 +237,9 @@ func (media *Convert) setupAudioConversion(fileStreams []*ffprobe.Stream) {
 		case "dca":
 			fallthrough
 		case "dts":
+			media.outAudio0 = "convert"
+			media.outAudio1 = "convert"
+		case "eac3":
 			media.outAudio0 = "convert"
 			media.outAudio1 = "convert"
 		default:
