@@ -9,6 +9,7 @@ import (
 var (
 	app    = kingpin.New("mkv2Appletv", "Convert as efficiently as possible media to AppleTV mp4 format.")
 	debug  = app.Flag("debug", "Enable debug mode.").Short('d').Bool()
+	quiet  = app.Flag("quiet", "Turn off all loggin output from ffmpeg ffprobe").Short('q').Bool()
 	try    = app.Flag("try", "When set to true only the first 10 seconds of conversion will be done").Short('t').Bool()
 	input  = app.Flag("input", "Location of input File").Short('i').Required().ExistingFile()
 	output = app.Flag("output", "Location of output mp4 File (not required, if not set output file name will be input filename +.mp4)").Short('o').String()
@@ -22,7 +23,7 @@ var (
 func main() {
 	var ()
 
-	kingpin.Version("0.0.7")
+	kingpin.Version("0.0.8")
 	app.UsageTemplate(kingpin.SeparateOptionalFlagsUsageTemplate)
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {

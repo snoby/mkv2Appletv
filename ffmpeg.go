@@ -88,7 +88,7 @@ func checkFFmpegVersion() error {
 // add stats: -stats
 func callFFmpeg(ffmpegCmd *ffmpegOut) (string, error) {
 
-	color.Yellow("Starting conversion")
+	color.Yellow("Starting conversion ")
 	cmd := exec.Command("ffmpeg", ffmpegCmd.ffArgs...)
 	//Debug
 	//fmt.Printf("\n%#v\n", cmd)

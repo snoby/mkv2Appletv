@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/fatih/color"
 )
 
 var (
@@ -145,7 +146,12 @@ func convertSource(in string, output string) {
 		// "trace"
 		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v", "verbose")
 	} else {
-		ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v", "warning")
+		fmt.Printf("Entered not debug\n")
+		if *quiet == true {
+			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v", "quiet")
+		} else {
+			ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-v", "warning", "-y", "-stats")
+		}
 	}
 
 	//
@@ -153,7 +159,8 @@ func convertSource(in string, output string) {
 	// conversion statics... Maybe we should capture the output and put in a process bar?...
 	//
 	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-i", in)
-	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-hide_banner", "-y", "-stats")
+
+	ffmpegCmd.ffArgs = append(ffmpegCmd.ffArgs, "-hide_banner")
 
 	if output != "" {
 		ffmpegCmd.outFile = output
@@ -181,11 +188,14 @@ func convertSource(in string, output string) {
 	}
 
 	// debug to dump the entire structure
-	//	color.Blue("\n\nType: %T\n%#v\n\n", ffmpegCmd.ffArgs, ffmpegCmd.ffArgs)
-	// for i := 0; i < len(ffmpegCmd.ffArgs); i++ {
-	// 	fmt.Printf("%s\n", ffmpegCmd.ffArgs[i])
-	// }
+	if *debug == true {
+	color.Blue("\n\nType: %T\n%#v\n\n", ffmpegCmd.ffArgs, ffmpegCmd.ffArgs)
+	 for i := 0; i < len(ffmpegCmd.ffArgs); i++ {
+	 	fmt.Printf("%s\n", ffmpegCmd.ffArgs[i])
+	 }
+	}
 
+		fmt.Printf("About to call ffmpeg\n")
 	_, err = callFFmpeg(ffmpegCmd)
 	if err != nil {
 		fmt.Printf("Error executing ffmpeg call\n")

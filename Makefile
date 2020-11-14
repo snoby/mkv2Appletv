@@ -5,7 +5,7 @@ package = github.com/snoby/mkv2Appletv
 MAKE=make
 BIN=mkv2Appletv
 BUILD=`git rev-parse HEAD`
-VERSION='0.0.7'
+VERSION='0.0.8'
 
 LDFLAGS=-ldflags "-X main.Build=${BUILD}"
 GOTHUB_OPTIONS=--user snoby --repo mkv2Appletv --tag ${VERSION}
@@ -15,7 +15,7 @@ GOTHUB_OPTIONS=--user snoby --repo mkv2Appletv --tag ${VERSION}
 
 
 github_release: clean install release
-	git tag ${VERSION} 
+	git tag ${VERSION}
 	git push --tags
 	gothub  release ${GOTHUB_OPTIONS}
 	gothub upload ${GOTHUB_OPTIONS} --file release/mkv2Appletv-darwin-amd64 --name mkv2Appletv-darwin-amd64
@@ -32,6 +32,8 @@ release:
 	GOOS=linux GOARCH=amd64 go build -o release/mkv2Appletv-linux-amd64
 	GOOS=darwin GOARCH=amd64 go build -o release/mkv2Appletv-darwin-amd64
 
+prereq:
+	go get ./...
 
 check:
 	golint
