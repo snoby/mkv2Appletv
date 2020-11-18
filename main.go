@@ -23,8 +23,10 @@ var (
 func main() {
 	var ()
 
-	kingpin.Version("0.0.8")
-	app.UsageTemplate(kingpin.SeparateOptionalFlagsUsageTemplate)
+	version := "0.0.0.8"
+	//kingpin.Version("0.0.8")
+
+	app.UsageTemplate(kingpin.SeparateOptionalFlagsUsageTemplate).Version(version).Author("Matt Snoby")
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 
